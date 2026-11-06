@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deep Agent Web</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='8' cy='16' r='5' fill='%237c9cff'/><circle cx='24' cy='8' r='4' fill='%233ecf8e'/><circle cx='24' cy='24' r='4' fill='%23f5a524'/><path d='M12 14 20 9M12 18l8 5' stroke='%23aab' stroke-width='2'/></svg>" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand"><span class="logo"></span>Deep Agent <b>Web</b></div>
+      <form id="run-form" class="run-form">
+        <select id="agent-select" title="Agent"></select>
+        <input id="model-input" list="model-list" placeholder="model, e.g. anthropic:claude-sonnet-5-5" title="Model (provider:model) – 'demo' runs offline" />
+        <datalist id="model-list"></datalist>
+        <input id="prompt-input" placeholder="Ask the agent something…" autocomplete="off" required />
+        <button id="run-btn" class="primary" type="submit">Run ▶</button>
+        <button id="stop-btn" type="button" class="danger" hidden>Stop ■</button>
+      </form>
+      <div class="top-actions">
+        <button id="import-btn" type="button" title="Open an exported run (.json)">Import</button>
+        <button id="export-btn" type="button" title="Download this run as JSON">Export</button>
+        <input id="import-file" type="file" accept="application/json,.json" hidden />
+      </div>
+    </header>
+
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-head">Runs <button id="refresh-runs" class="icon" title="Refresh">↻</button></div>
+        <ul id="run-list" class="run-list"></ul>
+        <div class="legend">
+          <div class="side-head">Legend</div>
+          <div><span class="lg agent"></span>agent / subagent</div>
+          <div><span class="lg llm"></span>model call</div>
+          <div><span class="lg tool"></span>tool call</div>
+          <div class="muted small">Double-click a subagent to collapse it. Scroll to zoom, drag to pan.</div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="statbar" id="statbar"></div>
+        <nav class="tabs">
+          <button data-tab="graph" class="on">Agent graph</button>
+          <button data-tab="timeline">Timeline</button>
+          <button data-tab="transcript">Transcript</button>
+          <span class="spacer"></span>
+          <span class="tab-tools" data-for="graph">
+            <label class="toggle"><input type="checkbox" id="turns-toggle" checked /> model turns</label>
+            <button id="zoom-out" class="icon" title="Zoom out">−</button>
+            <button id="zoom-in" class="icon" title="Zoom in">+</button>
+            <button id="fit-btn" title="Fit to view (F)">Fit</button>
+          </span>
+          <span class="tab-tools" data-for="timeline" hidden><span class="muted small">Ctrl + scroll to zoom</span></span>
+          <span class="tab-tools" data-for="transcript" hidden>
+            <select id="agent-filter"><option value="all">All agents</option></select>
+          </span>
+        </nav>
+        <section class="view" data-view="graph"><svg id="graph" class="graph"></svg>
+          <div id="welcome" class="welcome">
+            <h2>Visualise a LangChain Deep Agent</h2>
+            <p>Watch the agent plan with <code>write_todos</code>, delegate to subagents with <code>task</code>, and read and write its virtual filesystem, live or replayed.</p>
+            <p>Pick the <b>demo</b> model to try it offline, or enter a real model such as <code>anthropic:claude-sonnet-5-5</code>.</p>
+            <div class="examples" id="examples"></div>
+          </div>
+        </section>
+        <section class="view" data-view="timeline" hidden><div id="timeline" class="timeline"></div></section>
+        <section class="view" data-view="transcript" hidden><div id="transcript" class="transcript"></div></section>
+
+        <footer class="player">
+          <button id="p-start" class="icon" title="Jump to start (Home)">⏮</button>
+          <button id="p-prev" class="icon" title="Previous step (←)">◀</button>
+          <button id="p-play" class="icon play" title="Play / pause (Space)">▶</button>
+          <button id="p-next" class="icon" title="Next step (→)">▶|</button>
+          <button id="p-end" class="icon" title="Jump to end (End)">⏭</button>
+          <select id="p-speed" title="Playback speed">
+            <option value="0.5">0.5×</option><option value="1" selected>1×</option><option value="2">2×</option><option value="5">5×</option><option value="20">20×</option>
+          </select>
+          <input id="p-slider" type="range" min="0" max="0" value="0" />
+          <span id="p-label" class="p-label muted">–</span>
+          <button id="p-live" class="live" title="Follow live (L)">● LIVE</button>
+        </footer>
+      </main>
+
+      <aside class="rightbar">
+        <section class="panel">
+          <div class="panel-head">Plan <span class="muted small">write_todos</span></div>
+          <div id="todos" class="panel-body"></div>
+        </section>
+        <section class="panel">
+          <div class="panel-head">Virtual filesystem <span id="file-count" class="muted small"></span></div>
+          <div id="files" class="panel-body"></div>
+        </section>
+        <section class="panel grow">
+          <div class="panel-head">Inspector <button id="insp-clear" class="icon small" title="Show run summary">⟲</button></div>
+          <div id="inspector" class="panel-body"></div>
+        </section>
+      </aside>
+    </div>
+
+    <dialog id="file-dialog" class="file-dialog"></dialog>
+    <div id="toast" class="toast" hidden></div>
+    <script type="module" src="/static/js/app.js"></script>
+  </body>
+</html>
